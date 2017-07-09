@@ -12,17 +12,55 @@ class Board extends Component {
 			done: false
 		};
 		this.click = this.click.bind(this);
+		this.checkNeighbors = this.checkNeighbors.bind(this);
 		this.win = this.win;
-
 	}
 
+	componentDidMount() {
+		console.log('this runs');
+		let arr = this.state.squares.slice();
+		console.log('this is arr', arr);
+
+		for (let i = 0; i < 20; i++) {
+			for (let y = 0; y < 20; y++) {
+				let random = Math.floor(Math.random() * 8) + 1; 
+				if (random === 5) arr[i][y] = 'B'; 
+			}
+		}
+		this.setState({squares: arr});
+	}
+
+	test() {
+		console.log('test');
+	}
 	
 	click(r,b) {
-		console.log('row is ', r);
-		console.log('box is ', b);
 		let arr = this.state.squares.slice();
-		arr[r][b] = 'X';
+		if (arr[r][b] === 'B') {
+			console.log('game over');
+		} 
+		let result = this.checkNeighbors(r,b);
+		arr[r][b] = result; 
 		this.setState({squares: arr});
+    }
+
+    checkNeighbors(r,b) {
+    	let neighbors = [[r-1, b-1], [r-1, b], [r-1, b+1], [r, b-1], [r, b+1], [r+1, b-1], [r+1, b], [r+1, b+1]];
+    	let arr = this.state.squares.slice();
+    	let bombs = 0; 
+    	neighbors.forEach(item => {
+    		let row = item[0];
+    		let box = item[1];
+    		if (arr[row] && arr[row][box]) {
+    			if (arr[row][box] === 'B') {
+    				bombs++;
+    			}
+    		};
+    	});
+    	if (bombs === 0) {
+    		this.test();
+    	}
+    	return bombs; 
     }
 
 	render() {    	
@@ -36,7 +74,7 @@ class Board extends Component {
 		return (
 
       <div id="container">
-        <h1 id="header">Tic Cat Dog</h1>
+        <h1 id="header">MineSweeper</h1>
         {rows}
 	  </div>
       )
