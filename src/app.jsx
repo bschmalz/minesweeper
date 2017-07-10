@@ -1,11 +1,11 @@
 import React, { Component } from 'react'
 import { render } from 'react-dom'
 
+
 class Board extends Component {
 	constructor() {
 		super();
 		this.state = {
-			//squares: Array(9).fill(null),
 			squares: [...Array(20).keys()].map(i => Array(20)),
 			xIsNext: true,
 			current: 'cat is next', 
@@ -13,40 +13,56 @@ class Board extends Component {
 		};
 		this.click = this.click.bind(this);
 		this.checkNeighbors = this.checkNeighbors.bind(this);
+		this.clickNeighbors = this.clickNeighbors.bind(this);
 		this.win = this.win;
 	}
 
 	componentDidMount() {
-		console.log('this runs');
 		let arr = this.state.squares.slice();
-		console.log('this is arr', arr);
-
 		for (let i = 0; i < 20; i++) {
 			for (let y = 0; y < 20; y++) {
-				let random = Math.floor(Math.random() * 8) + 1; 
+				let random = Math.floor(Math.random() * 7) + 1; 
 				if (random === 5) arr[i][y] = 'B'; 
 			}
 		}
+		console.log('mounted');
 		this.setState({squares: arr});
 	}
 
-	test() {
-		console.log('test');
+	clickNeighbors(r,b) {
+		let arr = this.state.squares.slice();
+		let neighbors = [[r-1, b-1], [r-1, b], [r-1, b+1], [r, b-1], [r, b+1], [r+1, b-1], [r+1, b], [r+1, b+1]];
+		neighbors.forEach(item => {
+			let row = item[0];
+    		let box = item[1];
+    		if (row >=0 && row < 20 && box >= 0 && box < 20 && !arr[row][box] && arr[row][box] !== 0) {
+    			console.log('clicking row ' + row + ' and box ' +  box);
+    			this.click(row, box)
+    		};
+		});
 	}
 	
 	click(r,b) {
 		let arr = this.state.squares.slice();
 		if (arr[r][b] === 'B') {
 			console.log('game over');
-		} 
+			return; 
+		}
+		if (arr[r][b]) {
+			console.log('already clicked');
+			return;
+		};
+		console.log('not clicked'); 
 		let result = this.checkNeighbors(r,b);
 		arr[r][b] = result; 
-		this.setState({squares: arr});
+		this.setState({squares: arr}, () => {
+			if (result === 0) this.clickNeighbors(r,b);
+		});	
     }
 
     checkNeighbors(r,b) {
-    	let neighbors = [[r-1, b-1], [r-1, b], [r-1, b+1], [r, b-1], [r, b+1], [r+1, b-1], [r+1, b], [r+1, b+1]];
     	let arr = this.state.squares.slice();
+    	let neighbors = [[r-1, b-1], [r-1, b], [r-1, b+1], [r, b-1], [r, b+1], [r+1, b-1], [r+1, b], [r+1, b+1]];
     	let bombs = 0; 
     	neighbors.forEach(item => {
     		let row = item[0];
@@ -57,9 +73,7 @@ class Board extends Component {
     			}
     		};
     	});
-    	if (bombs === 0) {
-    		this.test();
-    	}
+
     	return bombs; 
     }
 
